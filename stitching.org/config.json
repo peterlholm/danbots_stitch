@@ -1,0 +1,23 @@
+{
+  "data_format_string": "data/points%d.ply",
+  "component_ranges": [[10, 20], [20, 30], [0, 10]],
+  "component_names": ["inner", "top", "outer"],
+  "visualize": 0,
+  "visualize_mesh_density": 0,
+  "remove_low_density": 1,
+  "write": 0,
+  "eval" : 1,
+  "ground_truth" : "data/eval/dental_point_cloud_crop.ply",
+  "use_default_parameters": 1,
+  "parameters" : {
+    "voxel_size": 0.3,
+    "epsilon": 0.35,
+    "minimum_points": 7,
+    "required_share": 0.06,
+    "neighbours_statistical": 10,
+    "neighbours_radius": 20,
+    "stdev_ratio": 2,
+    "low_density_threshold": 0.15,
+    "poisson_depth": 12
+  }
+}
