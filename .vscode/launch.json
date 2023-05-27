@@ -5,11 +5,35 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Stitch",
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Stitch test",
             "type": "python",
             "request": "launch",
             "program": "stitch.py",
-            "args": ["testdata/testobject/test_object.stl", "testdata/wand/render0/point_cloud2.ply"],
+            "args": ["-v",
+                "testdata/testobject/test_object.ply",
+                "testdata/testobject/test_object_z.ply"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+
+        {
+            "name": "Stitch wand",
+            "type": "python",
+            "request": "launch",
+            "program": "stitch.py",
+            "args": ["-v",
+                "testdata/testobject/test_object.ply",
+                "testdata/wand/render0/point_cloud2.ply"
+            ],
             "console": "integratedTerminal",
             "justMyCode": true
         }

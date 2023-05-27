@@ -2,14 +2,28 @@
 "Stitch a pointcloud to pointcloud"
 import sys
 from pathlib import Path
-from random import random
+#from random import random
 import argparse
 import open3d as o3d
-import numpy as np
+#import numpy as np
+from stitching.stitch import rstitch
+
 
 _DEBUG = False
 _SHOW = True
-_VERBOSE = True
+_VERBOSE = False
+
+
+def surface_to_pcl(mesh, alg="poisson", number_of_points=100000, init_factor=10):
+    "convert mesh surfaces to pointcloud, point_factor vertices/points"
+    if _DEBUG:
+        mesh_info(mesh)
+        print(f"Algoritm: {alg} Number_of_points: {number_of_points} Point_factor: {init_factor}")
+    if alg=='poisson':
+        pcl = mesh.sample_points_poisson_disk(number_of_points=number_of_points, )
+    else:
+        pcl = mesh.sample_points_uniformly(number_of_points=number_of_points, init_factor=init_factor)
+    return pcl
 
 def stl2pcl(mesh):
     "create pointcloud from vertices in stl"
@@ -33,23 +47,7 @@ def mesh_info(mesh):
     print("Oriented Bounding box",mesh.get_oriented_bounding_box())
     print("Vertices", len(mesh.vertices))
 
-def surface_to_pcl(mesh, alg="poisson", point_factor=10, number=1):
-    "convert mesh surfaces to pointcloud, point_factor vertices/points"
-    if _DEBUG:
-        mesh_info(mesh)
-    no_points = len(mesh.vertices)//point_factor * number
-    if _DEBUG:
-        print("algorithm poisson", alg=="poisson")
-    if alg=='poisson':
-        pcl = mesh.sample_points_poisson_disk(number_of_points=no_points)
-    else:
-        pcl = mesh.sample_points_uniformly(number_of_points=no_points)
-    #print("Resulting number of points", no_points)
-    return pcl
-
-
 if __name__ == "__main__":
-    #PICFOLDER = Path(__file__).parent / 'testdata'
     parser = argparse.ArgumentParser(prog='stitch3d', description='Stitch two 3d files and calculate error figures')
     parser.add_argument('-d', required=False, help="Turn debug on", action='store_true' )
     parser.add_argument('-v', required=False, help="Give verbose output", action='store_true' )
@@ -76,10 +74,12 @@ if __name__ == "__main__":
             print(f"Input object size {obj_size:.2f}")
         #print(mesh_info(mesh))
         #mesh = error = cmp_pcl(fil1, fil2)
-        in_pcl = stl2pcl(inmesh)
-        in2_pcl = surface_to_pcl(inmesh, point_factor=1, number=10000)
-        o3d.io.write_point_cloud('pcloud.ply', in_pcl)
-        o3d.io.write_point_cloud('pcloud2.ply', in2_pcl)
+        in_pcl = surface_to_pcl(inmesh)
+        #in2_pcl = surface_to_pcl(inmesh, point_factor=1, number=10000)
+        #o3d.io.write_point_cloud('pcloud.ply', in_pcl)
+        #o3d.io.write_point_cloud('pcloud2.ply', in2_pcl)
+    elif fil1.suffix=='.ply':
+        in_pcl = o3d.io.read_point_cloud(str(fil1))
     else:
         print("Input file type error")
         sys.exit(1)
@@ -87,4 +87,4 @@ if __name__ == "__main__":
     if fil2.suffix=='.ply':
         t_pcl = o3d.io.read_point_cloud(str(fil2))
 
-
+    rstitch(in_pcl, t_pcl)
