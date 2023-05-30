@@ -6,9 +6,13 @@ _DEBUG = True
 
 # Limit is ratio of total points in a cluster required to keep it.
 def keep_significant_clusters(pcd, limit=0.06, eps=0.35, min_points=7):
-    "filter pointcloud to significant clusters"
+    "reduse pointcloud to significant clusters"
+    if _DEBUG:
+        print(f"keeep significant cluster DBSCAN limit {limit} eps {eps} min_points {min_points}")
     pcd_result = o3d.geometry.PointCloud()
     clusters = pcd.cluster_dbscan(eps, min_points)
+    if _DEBUG:
+        print("DBSCAN result cluster[0]", clusters[0])
     # Messy way to count how many points are in each cluster.
     cluster_indicies = np.array(clusters) + 1
     # Bincount only counts non-negative.
@@ -17,7 +21,7 @@ def keep_significant_clusters(pcd, limit=0.06, eps=0.35, min_points=7):
     # (ii_vec - 1) corrects the one added above.
     counts = zip(ii_vec-1, cluster_indicies_count[ii_vec])
     # if _DEBUG:
-    #     print("counts", counts)
+    #     print("counts", len(counts))
     kept_indicies = []
     for (cluster, count) in counts:
         if cluster == -1:  # Skip the noise.
@@ -41,6 +45,8 @@ def keep_significant_clusters(pcd, limit=0.06, eps=0.35, min_points=7):
                 #print("inserted")
         else:
             pass
+    if _DEBUG:
+        print(f"no points {len(pcd.points)} kept indicies  {len(kept_indicies)}")
     return (pcd_result, kept_indicies)
 
 

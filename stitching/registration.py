@@ -1,7 +1,7 @@
 "pointcloud registrations"
+import copy
 import open3d as o3d
 import numpy as np
-import copy
 
 _DEBUG = True
 _SHOW = False
@@ -54,6 +54,7 @@ def execute_global_registration(source_down, target_down,
                                 scale=False, edge_length_thres=0.99,
                                 converge_itr=(10**8),
                                 converge_certainty=0.9999):
+    "find global registation"
     distance_threshold = voxel_size * dist_thres_scalar
     result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
         source_down, target_down, source_fpfh, target_fpfh, True,
@@ -71,6 +72,7 @@ def execute_global_registration(source_down, target_down,
 
 def execute_local_registration(source_down, target_down, voxel_size,
                                init_transformation, converge_max_itr=30):
+    "Find local registration"
     conver_crit = o3d.pipelines.registration.ICPConvergenceCriteria()
     conver_crit.max_iteration = converge_max_itr
     result_icp = o3d.pipelines.registration.registration_icp(
@@ -87,46 +89,48 @@ def prepare_dataset(source, target, voxel_size):
     return source_down, target_down, source_fpfh, target_fpfh
 
 
-def get_transformations(pcds, voxel_size):
+def get_transformations(org, test_target, voxel_size):
     "get transformations from pointclouds"
-    n_clouds = len(pcds)
-    pivot = n_clouds // 2
-    if _DEBUG:
-        print("pivot", pivot)
-    target = o3d.geometry.PointCloud() + pcds[pivot]
+    # n_clouds = len(pcds)
+    # pivot = n_clouds // 2
+    # if _DEBUG:
+    #     print("pivot", pivot)
+    #target = o3d.geometry.PointCloud() + pcds[pivot]
+    target = org
     transformations = []
+    transformations.append(np.identity(4))
     # Process from middle (pivot) and out.
-    processing_order = sorted(range(n_clouds), key=lambda i: abs(pivot-i))
-    print("Processing order", processing_order)
-    for i in processing_order:
-        if _DEBUG:
-            print("Processing:", i)
-        if i == pivot:
-            transformations.append(np.identity(4))
-            continue
-        else:
-            source_down, target_down, source_fpfh, target_fpfh = \
-                prepare_dataset(pcds[i], target, voxel_size)
+    #processing_order = sorted(range(n_clouds), key=lambda i: abs(pivot-i))
+    #print("Processing order", processing_order)
+    #for i in processing_order:
+    if _DEBUG:
+        print("Processing:")
+    # if i == pivot:
+    #     transformations.append(np.identity(4))
+    #     continue
+    #else:
+    source_down, target_down, source_fpfh, target_fpfh = prepare_dataset(test_target, target, voxel_size)
+    print("end preparation")
+    result_ransac = execute_global_registration(
+            source_down, target_down, source_fpfh, target_fpfh,
+            voxel_size)
 
-            result_ransac = execute_global_registration(
-                    source_down, target_down, source_fpfh, target_fpfh,
-                    voxel_size)
+    result_icp = execute_local_registration(
+            source_down, target_down,
+            voxel_size, result_ransac.transformation)
 
-            result_icp = execute_local_registration(
-                    source_down, target_down,
-                    voxel_size, result_ransac.transformation)
+    transformation = result_icp.transformation
 
-            transformations.append(result_icp.transformation)
-            source_down.transform(result_icp.transformation)
-            target += source_down
-            target = target.voxel_down_sample(voxel_size)
-            if _DEBUG:
-                print("calculating information matrix")
-                if _SHOW:
-                    draw_registration_result(pcds[i], target, result_icp.transformation )
-                print(result_icp)
-                print("tansformatin matrix", result_icp.transformation)
-                inf_matrix = o3d.pipelines.registration.get_information_matrix_from_point_clouds(pcds[i], target, 2.0, result_icp.transformation)
-                print("information matrix", inf_matrix)
+    source_down.transform(result_icp.transformation)
+    target += source_down
+    target = target.voxel_down_sample(voxel_size)
+    if _DEBUG:
+        print("calculating information matrix")
+        if _SHOW:
+            draw_registration_result(test_target, target, result_icp.transformation )
+        print(result_icp)
+        print("tansformatin matrix", result_icp.transformation)
+        inf_matrix = o3d.pipelines.registration.get_information_matrix_from_point_clouds(test_target, target, 2.0, result_icp.transformation)
+        print("information matrix", inf_matrix)
 
-    return pcds, [transformations[i] for i in np.argsort(processing_order)]
+    return test_target, transformation, inf_matrix

@@ -6,6 +6,14 @@ from . import noise_removal as nr
 
 _DEBUG = True
 
+
+VOXEL_SIZE = 0.3
+
+def color_obj(obj, color=(0,0,0)):
+    "add color to object"
+    obj.paint_uniform_color(color)
+    return obj
+
 def show_objects(obj, name=""):
     "Show the object list"
     o3d.visualization.draw_geometries(obj, window_name=name, width=1000, height=1000)
@@ -34,6 +42,8 @@ def clean_point_cloud(pcd, epsilon=0.35, minimum_points=7, required_share =0.06)
     epsilon = 0.35
     minimum_points = 7
     required_share = 0.06
+    epsilon = 0.001
+
     #print("input points", len(pcd.points) )
     pcd_result, kept_indicies = nr.keep_significant_clusters(pcd, required_share, epsilon, minimum_points)
     if _DEBUG:
@@ -41,10 +51,17 @@ def clean_point_cloud(pcd, epsilon=0.35, minimum_points=7, required_share =0.06)
     return pcd_result
 
 
+def reg_point_clouds(org, new):
+    "register point cloud"
+    #print("Computing transformations component-wise using RANSAC and ICP.")
+    #test_target, transformation, inf_matrix
+    test_target, transformation, inf_matrix = [reg.get_transformations(org, new, VOXEL_SIZE)]
+    return test_target, transformation
+
 def rstitch(org, new):
     "run the stitching"
     color = True
-    print("Starting")
+    print("Starting ")
 
     if color:
         if org.has_colors():
@@ -56,10 +73,16 @@ def rstitch(org, new):
         new.paint_uniform_color((0,1,0))
 
     #c_in = clean_point_cloud(org)
+    print("start cleaning")
     c_test = clean_point_cloud(new)
+    color_obj(c_test)
+    #objects = [new, c_test]
+    #show_objects(objects)
 
-    objects = [new, c_test]
-    show_objects(objects)
+    print("Start register")
+    reg_point_clouds(org, c_test)
+
+
     # objects = [ org, new]
     # show_objects(objects)
     return
