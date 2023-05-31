@@ -19,7 +19,7 @@
             "program": "stitch.py",
             "args": ["-v",
                 "testdata/testobject/test_object.ply",
-                "testdata/testobject/test_object_z.ply"
+                "testdata/testobject/test_object_u10000.ply"
             ],
             "console": "integratedTerminal",
             "justMyCode": true

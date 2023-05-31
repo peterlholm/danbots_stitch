@@ -7,7 +7,7 @@ from . import noise_removal as nr
 _DEBUG = True
 
 
-VOXEL_SIZE = 0.3
+VOXEL_SIZE = 0.0001
 
 def color_obj(obj, color=(0,0,0)):
     "add color to object"
@@ -47,7 +47,7 @@ def clean_point_cloud(pcd, epsilon=0.35, minimum_points=7, required_share =0.06)
     #print("input points", len(pcd.points) )
     pcd_result, kept_indicies = nr.keep_significant_clusters(pcd, required_share, epsilon, minimum_points)
     if _DEBUG:
-        print("Removing ", len(pcd.points) - len(kept_indicies), "points of " + str(len(pcd.points)))
+        print(f"Kept points: {len(kept_indicies)} Removing  {len(pcd.points) - len(kept_indicies)}")
     return pcd_result
 
 
@@ -74,15 +74,16 @@ def rstitch(org, new):
 
     #c_in = clean_point_cloud(org)
     print("start cleaning")
-    c_test = clean_point_cloud(new)
-    color_obj(c_test)
+    #c_org = clean_point_cloud(org)
+    #c_test = clean_point_cloud(new, epsilon=1)
+    color_obj(new)
     #objects = [new, c_test]
     #show_objects(objects)
 
     print("Start register")
-    reg_point_clouds(org, c_test)
+    test_target, transformation = reg_point_clouds(org, new)
 
-
+    print("Transformation", transformation)
     # objects = [ org, new]
     # show_objects(objects)
     return
