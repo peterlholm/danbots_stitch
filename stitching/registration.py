@@ -33,8 +33,12 @@ def compute_normal(pcd):
 
 
 def preprocess_point_cloud(pcd, voxel_size):
-    "prepare point cloud by down sample"
+    "prepare point cloud by down sample and compute features"
+    if _DEBUG:
+        print("Downsample and compute features")
     pcd_down = pcd.voxel_down_sample(voxel_size)
+    if _DEBUG:
+        print(f"Downsample to {len(pcd_down.points)} points")
     if _TMPFILE:
         o3d.io.write_point_cloud("/tmp/downsample.ply", pcd_down)
     compute_normal(pcd_down)
@@ -45,6 +49,7 @@ def preprocess_point_cloud(pcd, voxel_size):
     pcd_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
         pcd_down,
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
+    print(f"pcd_fpfh features dimension: {pcd_fpfh.dimension()} numbers: {pcd_fpfh.num()}")
     return pcd_down, pcd_fpfh
 
 
@@ -85,12 +90,11 @@ def execute_local_registration(source_down, target_down, voxel_size,
     return result_icp
 
 
-def prepare_dataset(source, target, voxel_size):
+def prepare_dataset(source, test_target, voxel_size):
     "prepare data set "
     source_down, source_fpfh = preprocess_point_cloud(source, voxel_size)
-    target_down, target_fpfh = preprocess_point_cloud(target, voxel_size)
+    target_down, target_fpfh = preprocess_point_cloud(test_target, voxel_size)
     return source_down, target_down, source_fpfh, target_fpfh
-
 
 def get_transformations(org, test_target, voxel_size):
     "get transformations from pointclouds"
@@ -106,13 +110,12 @@ def get_transformations(org, test_target, voxel_size):
     #processing_order = sorted(range(n_clouds), key=lambda i: abs(pivot-i))
     #print("Processing order", processing_order)
     #for i in processing_order:
-    if _DEBUG:
-        print("Processing:")
+
     # if i == pivot:
     #     transformations.append(np.identity(4))
     #     continue
     #else:
-    source_down, target_down, source_fpfh, target_fpfh = prepare_dataset(test_target, target, voxel_size)
+    target_down, test_down, target_fpfh, test_fpfh = prepare_dataset(target, test_target, voxel_size)
     print("end preparation")
     result_ransac = execute_global_registration(
             source_down, target_down, source_fpfh, target_fpfh,
