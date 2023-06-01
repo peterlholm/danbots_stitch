@@ -56,31 +56,31 @@ def reg_point_clouds(org, new):
     #print("Computing transformations component-wise using RANSAC and ICP.")
     #test_target, transformation, inf_matrix
     test_target, transformation, inf_matrix = reg.get_transformations(org, new, VOXEL_SIZE)
+    if _DEBUG:
+        print("Regisering test_target", test_target)
+        print("Regisering transformation:", transformation)
+        print("Registering information matrix", inf_matrix)
     return test_target, transformation
 
 def rstitch(org, new):
     "run the stitching"
     color = True
-    print("Starting ")
-
     if color:
         if org.has_colors():
             print("infile has color")
         org.paint_uniform_color((1,0,0))
-
         if new.has_colors():
             print("test file has color")
         new.paint_uniform_color((0,1,0))
+    if False:   # cleaning
+        print("start cleaning")
+        c_org = clean_point_cloud(org)
+        c_test = clean_point_cloud(new, epsilon=1)
+        color_obj(c_test)
+        objects = [c_org, c_test]
+        show_objects(objects)
 
-    #c_in = clean_point_cloud(org)
-    print("start cleaning")
-    #c_org = clean_point_cloud(org)
-    #c_test = clean_point_cloud(new, epsilon=1)
-    color_obj(new)
-    #objects = [new, c_test]
-    #show_objects(objects)
-
-    print("Start register")
+    print("Start registering")
     test_target, transformation = reg_point_clouds(org, new)
 
     print("Transformation", transformation)

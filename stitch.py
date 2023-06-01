@@ -51,24 +51,22 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='stitch3d', description='Stitch two 3d files and calculate error figures')
     parser.add_argument('-d', required=False, help="Turn debug on", action='store_true' )
     parser.add_argument('-v', required=False, help="Give verbose output", action='store_true' )
-    parser.add_argument('org_file', help="The original stl or pointcloud")
-    parser.add_argument('test_file', help="The pointcloud to be measured")
+    parser.add_argument('org_file', type=Path, help="The original stl or pointcloud")
+    parser.add_argument('test_file', type=Path, help="The pointcloud to be measured")
     args = parser.parse_args()
-    if args.d:
-        _DEBUG=True
+
+    _DEBUG = args.d
     _VERBOSE = args.v
-    fil1 = Path(args.org_file)
-    fil2 = Path(args.test_file)
     if _VERBOSE:
-        print(f"Stitching {fil1} and {fil2}")
+        print(f"Stitching {str(args.org_file)} and {args.test_file}")
     # check files exists
-    if not fil1.exists() or not fil2.exists():
+    if not args.org_file.exists() or not args.test_file.exists():
         print("input file(s) does not exist")
         sys.exit(1)
     # check file types
 
-    if fil1.suffix=='.stl':
-        inmesh = o3d.io.read_triangle_mesh(str(fil1))
+    if args.org_file.suffix=='.stl':
+        inmesh = o3d.io.read_triangle_mesh(str(args.org_file))
         obj_size = mesh_size(inmesh)
         if _VERBOSE:
             print(f"Input object size {obj_size:.2f}")
@@ -78,13 +76,13 @@ if __name__ == "__main__":
         #in2_pcl = surface_to_pcl(inmesh, point_factor=1, number=10000)
         #o3d.io.write_point_cloud('pcloud.ply', in_pcl)
         #o3d.io.write_point_cloud('pcloud2.ply', in2_pcl)
-    elif fil1.suffix=='.ply':
-        in_pcl = o3d.io.read_point_cloud(str(fil1))
+    elif args.org_file.suffix=='.ply':
+        in_pcl = o3d.io.read_point_cloud(str(args.org_file))
     else:
         print("Input file type error")
         sys.exit(1)
 
-    if fil2.suffix=='.ply':
-        t_pcl = o3d.io.read_point_cloud(str(fil2))
+    if args.test_file.suffix=='.ply':
+        t_pcl = o3d.io.read_point_cloud(str(args.test_file))
 
     rstitch(in_pcl, t_pcl)
