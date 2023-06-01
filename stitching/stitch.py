@@ -55,7 +55,7 @@ def reg_point_clouds(org, new):
     "register point cloud"
     #print("Computing transformations component-wise using RANSAC and ICP.")
     #test_target, transformation, inf_matrix
-    test_target, transformation, inf_matrix = [reg.get_transformations(org, new, VOXEL_SIZE)]
+    test_target, transformation, inf_matrix = reg.get_transformations(org, new, VOXEL_SIZE)
     return test_target, transformation
 
 def rstitch(org, new):

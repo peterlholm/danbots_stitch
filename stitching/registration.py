@@ -67,6 +67,9 @@ def execute_global_registration(source_down, target_down,
                 distance_threshold)
         ], o3d.pipelines.registration.RANSACConvergenceCriteria(
             converge_itr, converge_certainty))
+    if _DEBUG:
+        print("Global registration:", result)
+        print("Transformation Matrixc", result.transformation)
     return result
 
 
