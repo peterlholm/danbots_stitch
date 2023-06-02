@@ -79,7 +79,7 @@ def rstitch(reference, new):
     if _DEBUG:
         print("Regisering test_target", test_target)
         print("Regisering transformation:", transformation)
-        print("Registering information matrix", inf_matrix)
+        #print("Registering information matrix", inf_matrix)
 
     print("Transformation", transformation)
     # objects = [ org, new]

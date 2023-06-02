@@ -7,25 +7,19 @@ _DEBUG = True
 _SHOW = False
 _TMPFILE = True
 
-def draw_registration_result(reference, test_source, transformation, axis=False, window_name="registration result"):
+def draw_registration_result(reference, test_source, transformation, axis=False, window_name="registration result", color=False):
     "Debug draw registration result"
     reference_temp = copy.deepcopy(reference)
-    reference_temp.paint_uniform_color([0, 0.651, 0.929])
     test_temp = copy.deepcopy(test_source)
-    test_temp.paint_uniform_color([1, 0.706, 0])
+    if color:
+        reference_temp.paint_uniform_color([0, 0.7, 0.1])
+        test_temp.paint_uniform_color([1, 0.0, 0.1])
     test_temp.transform(transformation)
     pointclouds =[reference_temp, test_temp]
     if axis:
         axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1, origin=[0, 0, 0])
         pointclouds.append(axis_pcd)
-    #vis.add_geometry(axis_pcd)
     o3d.visualization.draw_geometries(pointclouds, window_name=window_name)
-
-    # o3d.visualization.draw_geometries([target_temp, test_temp,  axis_pcd],
-    #                                   zoom=0.2,
-    #                                   front=[0.9288, -0.2951, -0.2242],
-    #                                   lookat=[0,0,0],
-    #                                   up=[0.0, 0.0, 10.0])
 
 def compute_normal(pcd):
     "creates normalts that all point in same (wrong) direction (due to low radius)"
@@ -39,13 +33,9 @@ def compute_normal(pcd):
 
 def preprocess_point_cloud(pcd, voxel_size):
     "prepare point cloud by down sample and compute features"
-    if _DEBUG:
-        print("Downsample and compute features")
     pcd_down = pcd.voxel_down_sample(voxel_size)
     if _DEBUG:
-        print(f"Downsample to {len(pcd_down.points)} points")
-    if _TMPFILE:
-        o3d.io.write_point_cloud("/tmp/downsample.ply", pcd_down)
+        print(f"Downsample voxel({voxel_size }) to {len(pcd_down.points)} points")
     compute_normal(pcd_down)
     if _TMPFILE:
         o3d.io.write_point_cloud("/tmp/normals.ply", pcd_down)
@@ -56,7 +46,6 @@ def preprocess_point_cloud(pcd, voxel_size):
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
     print(f"pcd_fpfh features dimension: {pcd_fpfh.dimension()} numbers: {pcd_fpfh.num()}")
     return pcd_down, pcd_fpfh
-
 
 def execute_global_registration(reference_down, target_down,
                                 reference_fpfh, target_fpfh,
@@ -79,7 +68,6 @@ def execute_global_registration(reference_down, target_down,
         ], o3d.pipelines.registration.RANSACConvergenceCriteria(
             converge_itr, converge_certainty))
     return result
-
 
 def execute_local_registration(source_down, reference_down, voxel_size,
                                init_transformation, converge_max_itr=30):
@@ -109,19 +97,13 @@ def get_transformations(ref, test_target, voxel_size):
     result_ransac = execute_global_registration(
             ref_down, test_down, ref_fpfh, test_fpfh,
             voxel_size)
-
     if _DEBUG:
         print("global transformation matrix", result_ransac, np.around(result_ransac.transformation,3))
         draw_registration_result(ref_down, test_down, result_ransac.transformation, window_name="Global registration")
-
-    # inf_matrix = o3d.pipelines.registration.get_information_matrix_from_point_clouds(test_target, ref_down, 2.0, result_ransac.transformation)
-    # print("information matrix", inf_matrix)
-
-   
+  
     result_icp = execute_local_registration(
             test_down, ref_down,
             voxel_size, result_ransac.transformation)
-
     if _DEBUG:
         print("Local transformation matrix", result_icp, np.around(result_icp.transformation,3))
         draw_registration_result(ref_down, test_down, result_icp.transformation, window_name="Local registration")
@@ -129,17 +111,9 @@ def get_transformations(ref, test_target, voxel_size):
  
     transformation = result_icp.transformation
 
-    test_down.transform(result_icp.transformation)
-    target += test_down
-    target = target.voxel_down_sample(voxel_size)
-    if _DEBUG:
-        print("calculating information matrix")
-        if _SHOW:
-            draw_registration_result(test_target, target, result_icp.transformation )
-        print("fitness = overlapping(0.93), rms= fejl (0.0003)")
-        print(result_icp)
-        print("tansformatin matrix", result_icp.transformation)
-        # inf_matrix = o3d.pipelines.registration.get_information_matrix_from_point_clouds(test_target, target, 2.0, result_icp.transformation)
+    # test_down.transform(result_icp.transformation)
+    # target += test_down
+    # target = target.voxel_down_sample(voxel_size)
         # print("information matrix", inf_matrix)
 
     return test_target, transformation #, inf_matrix
