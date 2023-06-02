@@ -7,6 +7,12 @@ _DEBUG = True
 _SHOW = False
 _TMPFILE = True
 
+GLOBAL_FITNESS = 0.5
+GLOBAL_RMSE = 0.001
+LOCAL_FITNESS = 0.5
+LOCAL_RMSE = 0.001
+
+
 def draw_registration_result(reference, test_source, transformation, axis=False, window_name="registration result", color=False):
     "Debug draw registration result"
     reference_temp = copy.deepcopy(reference)
@@ -100,13 +106,16 @@ def get_transformations(ref, test_target, voxel_size):
     if _DEBUG:
         print("global transformation matrix", result_ransac, np.around(result_ransac.transformation,3))
         draw_registration_result(ref_down, test_down, result_ransac.transformation, window_name="Global registration")
-  
+    if result_ransac.fitness < GLOBAL_FITNESS or result_ransac.inlier_rmse > GLOBAL_RMSE:
+        print("BAD GLOBAL REGISTRATION", result_ransac)
     result_icp = execute_local_registration(
             test_down, ref_down,
             voxel_size, result_ransac.transformation)
     if _DEBUG:
         print("Local transformation matrix", result_icp, np.around(result_icp.transformation,3))
         draw_registration_result(ref_down, test_down, result_icp.transformation, window_name="Local registration")
+    if result_icp.fitness < LOCAL_FITNESS or result_icp.inlier_rmse >LOCAL_RMSE:
+        print("BAD LOCAL REGISTRATION", result_icp)
 
  
     transformation = result_icp.transformation
