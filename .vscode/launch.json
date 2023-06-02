@@ -13,7 +13,7 @@
             "justMyCode": true
         },
         {
-            "name": "Stitch test",
+            "name": "Stitch test - ens",
             "type": "python",
             "request": "launch",
             "program": "stitch.py",
@@ -23,16 +23,27 @@
             ],
             "console": "integratedTerminal",
             "justMyCode": true
-        }
-
+        },
         {
-            "name": "Stitch wand",
+            "name": "Stitch test - 0.001",
             "type": "python",
             "request": "launch",
             "program": "stitch.py",
             "args": ["-v",
-                "testdata/testobject/test_object.ply",
-                "testdata/wand/render0/point_cloud2.ply"
+                "testdata/testobject/obj1/test_object_p1M.ply",
+                "testdata/testobject/obj1/trans/test_object_p10000_rxyz-0.1.ply"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+       {
+            "name": "Stitch wand",
+            "type": "python",
+            "request": "launch",
+            "program": "stitch.py",
+            "args": ["-v", "-d",
+                "testdata/testobject/obj1/test_object_p1M.ply",
+                "testdata/testobject/obj1/trans/wand.ply"
             ],
             "console": "integratedTerminal",
             "justMyCode": true

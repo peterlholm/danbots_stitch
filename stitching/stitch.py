@@ -51,37 +51,35 @@ def clean_point_cloud(pcd, epsilon=0.35, minimum_points=7, required_share =0.06)
     return pcd_result
 
 
-def reg_point_clouds(org, new):
-    "register point cloud"
+def reg_point_clouds(ref, new):
+    "register point cloud and find tranformatin bringing new to ref"
     #print("Computing transformations component-wise using RANSAC and ICP.")
-    #test_target, transformation, inf_matrix
-    test_target, transformation, inf_matrix = reg.get_transformations(org, new, VOXEL_SIZE)
-    if _DEBUG:
-        print("Regisering test_target", test_target)
-        print("Regisering transformation:", transformation)
-        print("Registering information matrix", inf_matrix)
+    test_target, transformation = reg.get_transformations(ref, new, VOXEL_SIZE)
     return test_target, transformation
 
-def rstitch(org, new):
+def rstitch(reference, new):
     "run the stitching"
-    color = True
+    color=True
+    if _DEBUG:
+        print(f"Reference: {len(reference.points):8} Points, Color: {reference.has_colors()}")
+        print(f"Test:      {len(new.points):8} Points, Color: {reference.has_colors()}")
+        color = True
     if color:
-        if org.has_colors():
-            print("infile has color")
-        org.paint_uniform_color((1,0,0))
-        if new.has_colors():
-            print("test file has color")
+        reference.paint_uniform_color((1,0,0))
         new.paint_uniform_color((0,1,0))
     if False:   # cleaning
         print("start cleaning")
-        c_org = clean_point_cloud(org)
+        c_org = clean_point_cloud(reference)
         c_test = clean_point_cloud(new, epsilon=1)
         color_obj(c_test)
         objects = [c_org, c_test]
         show_objects(objects)
 
-    print("Start registering")
-    test_target, transformation = reg_point_clouds(org, new)
+    test_target, transformation = reg_point_clouds(reference, new)
+    if _DEBUG:
+        print("Regisering test_target", test_target)
+        print("Regisering transformation:", transformation)
+        print("Registering information matrix", inf_matrix)
 
     print("Transformation", transformation)
     # objects = [ org, new]
