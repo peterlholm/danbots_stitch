@@ -13,17 +13,17 @@ LOCAL_FITNESS = 0.5
 LOCAL_RMSE = 0.001
 
 
-def draw_registration_result(reference, test_source, transformation, axis=False, window_name="registration result", color=False):
+def draw_registration_result(reference, test_source, transformation, axis=False, window_name="registration result", color=True):   # pylint: disable=too-many-arguments
     "Debug draw registration result"
     reference_temp = copy.deepcopy(reference)
     test_temp = copy.deepcopy(test_source)
     if color:
-        reference_temp.paint_uniform_color([0, 0.7, 0.1])
-        test_temp.paint_uniform_color([1, 0.0, 0.1])
+        reference_temp.paint_uniform_color([0, 0.7, 0.1])   # green
+        test_temp.paint_uniform_color([1, 0.0, 0.1])        # red
     test_temp.transform(transformation)
     pointclouds =[reference_temp, test_temp]
     if axis:
-        axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1, origin=[0, 0, 0])
+        axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.01, origin=[0, 0, 0])
         pointclouds.append(axis_pcd)
     o3d.visualization.draw_geometries(pointclouds, window_name=window_name)
 
@@ -53,7 +53,7 @@ def preprocess_point_cloud(pcd, voxel_size):
     print(f"pcd_fpfh features dimension: {pcd_fpfh.dimension()} numbers: {pcd_fpfh.num()}")
     return pcd_down, pcd_fpfh
 
-def execute_global_registration(reference_down, target_down,
+def execute_global_registration(reference_down, target_down,        # pylint: disable=too-many-arguments
                                 reference_fpfh, target_fpfh,
                                 voxel_size, dist_thres_scalar=1.5,
                                 scale=False, edge_length_thres=0.99,
@@ -93,13 +93,13 @@ def prepare_dataset(ref, test_target, voxel_size):
     test_target_down, test_target_fpfh = preprocess_point_cloud(test_target, voxel_size)
     return ref_down, test_target_down, ref_fpfh, test_target_fpfh
 
-def get_transformations(ref, test_target, voxel_size):
+def get_transformations(ref, test_target, voxel_size=0.0005):
     "get transformations from pointclouds"
-    print(voxel_size)
-    voxel_size = 0.0005
+    print("Get transformations, voxel size", voxel_size)
+    #voxel_size = 0.0005
     ref_down, test_down, ref_fpfh, test_fpfh = prepare_dataset(ref, test_target, voxel_size)
-    
-    o3d.visualization.draw_geometries([ref_down, test_down], window_name="downsample")
+    if _SHOW:
+        o3d.visualization.draw_geometries([ref_down, test_down], window_name="downsample")
     result_ransac = execute_global_registration(
             ref_down, test_down, ref_fpfh, test_fpfh,
             voxel_size)
@@ -117,7 +117,7 @@ def get_transformations(ref, test_target, voxel_size):
     if result_icp.fitness < LOCAL_FITNESS or result_icp.inlier_rmse >LOCAL_RMSE:
         print("BAD LOCAL REGISTRATION", result_icp)
 
- 
+
     transformation = result_icp.transformation
 
     # test_down.transform(result_icp.transformation)

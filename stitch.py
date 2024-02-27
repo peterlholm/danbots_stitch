@@ -48,19 +48,22 @@ def mesh_info(mesh):
     print("Vertices", len(mesh.vertices))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='stitch3d', description='Stitch two 3d files and calculate error figures')
+    parser = argparse.ArgumentParser(prog='stitch', description='Stitch a file and a folder')
     parser.add_argument('-d', required=False, help="Turn debug on", action='store_true' )
     parser.add_argument('-v', required=False, help="Give verbose output", action='store_true' )
+    parser.add_argument('-s', required=False, help="Show pointclouds", action='store_true' )
     parser.add_argument('org_file', type=Path, help="The original stl or pointcloud")
-    parser.add_argument('test_file', type=Path, help="The pointcloud to be measured")
+    parser.add_argument('test_folder', type=Path, help="The pointcloud to be measured")
     args = parser.parse_args()
 
     _DEBUG = args.d
     _VERBOSE = args.v
+    _SHOW =args.s
+
     if _VERBOSE:
-        print(f"Stitching {str(args.org_file)} and {args.test_file}")
+        print(f"Stitching {str(args.org_file)} and {args.test_folder}")
     # check files exists
-    if not args.org_file.exists() or not args.test_file.exists():
+    if not args.org_file.exists() or not args.test_folder.exists():
         print("input file(s) does not exist")
         sys.exit(1)
     # check file types
@@ -81,8 +84,15 @@ if __name__ == "__main__":
     else:
         print("Input file type error")
         sys.exit(1)
-
-    if args.test_file.suffix=='.ply':
-        t_pcl = o3d.io.read_point_cloud(str(args.test_file))
-
-    rstitch(in_pcl, t_pcl)
+    print("ORG file:", args.org_file)
+    if args.test_folder.exists():
+        for f in args.test_folder.glob("*.ply"):
+            print("Stitching:", f)
+            print("--------------------------")
+            t_pcl = o3d.io.read_point_cloud(str(f))
+            transformation = rstitch(in_pcl, t_pcl)
+            if _DEBUG:
+                print("Transformation", transformation)
+            break
+    else:
+        print("Input folder does not exist", args.test_folder)

@@ -1,18 +1,22 @@
 pip>=20.3
-django
-django-crispy-forms
-requests
-pillow
+pylint
 numpy
-watchdog
-scikit-learn
-matplotlib
+open3d
+#opencv-python-headless
 
-opencv-python-headless
+
+
+
+#django
+#django-crispy-forms
+#requests
+#pillow
+#watchdog
+#scikit-learn
+#matplotlib
+
 #opencv-phython
 
-pylint
-pylint-django
+#pylint-django
 
-open3d
 #tensorflow

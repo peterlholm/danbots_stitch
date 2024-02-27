@@ -4,10 +4,10 @@ import open3d as o3d
 from . import registration as reg
 from . import noise_removal as nr
 
-_DEBUG = True
+_DEBUG = False
 
 
-VOXEL_SIZE = 0.0001
+VOXEL_SIZE = 0.0005
 
 def color_obj(obj, color=(0,0,0)):
     "add color to object"
@@ -84,4 +84,4 @@ def rstitch(reference, new):
     print("Transformation", transformation)
     # objects = [ org, new]
     # show_objects(objects)
-    return
+    return transformation

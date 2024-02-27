@@ -6,47 +6,29 @@
     "configurations": [
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
         },
         {
-            "name": "Stitch test - ens",
-            "type": "python",
+            "name": "Python: Current File DEBUG",
+            "type": "debugpy",
             "request": "launch",
-            "program": "stitch.py",
-            "args": ["-v",
-                "testdata/testobject/test_object.ply",
-                "testdata/testobject/test_object_u10000.ply"
-            ],
+            "program": "${file}",
+            "args": ["-v","-d", "-s", "testdata/test/serie1/file1.ply", "testdata/test/serie2/"],
             "console": "integratedTerminal",
             "justMyCode": true
         },
         {
-            "name": "Stitch test - 0.001",
-            "type": "python",
+            "name": "Python: Current File with params",
+            "type": "debugpy",
             "request": "launch",
             "program": "stitch.py",
-            "args": ["-v",
-                "testdata/testobject/obj1/test_object_p1M.ply",
-                "testdata/testobject/obj1/trans/test_object_p10000_rxyz-0.1.ply"
-            ],
+            "args": ["testdata/test/serie1/fortand.ply", "testdata/test/serie2/"],
             "console": "integratedTerminal",
             "justMyCode": true
         },
-       {
-            "name": "Stitch wand",
-            "type": "python",
-            "request": "launch",
-            "program": "stitch.py",
-            "args": ["-v", "-d",
-                "testdata/testobject/obj1/test_object_p1M.ply",
-                "testdata/testobject/obj1/trans/wand.ply"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        }
     ]
 }
