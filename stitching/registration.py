@@ -4,7 +4,7 @@ import open3d as o3d
 import numpy as np
 
 _DEBUG = True
-_SHOW = False
+_SHOW = True
 _TMPFILE = True
 
 GLOBAL_FITNESS = 0.5
@@ -99,6 +99,7 @@ def get_transformations(ref, test_target, voxel_size=0.0005):
     #voxel_size = 0.0005
     ref_down, test_down, ref_fpfh, test_fpfh = prepare_dataset(ref, test_target, voxel_size)
     if _SHOW:
+        print("try show")
         o3d.visualization.draw_geometries([ref_down, test_down], window_name="downsample")
     result_ransac = execute_global_registration(
             ref_down, test_down, ref_fpfh, test_fpfh,

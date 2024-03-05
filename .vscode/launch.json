@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
             "name": "Python: Current File",
             "type": "debugpy",
             "request": "launch",
@@ -17,16 +25,39 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "args": ["-v","-d", "-s", "testdata/test/serie1/file1.ply", "testdata/test/serie2/"],
+            "args": [
+                "-v",
+                "-d",
+                "-s",
+                "testdata/test/serie1/fortand.ply",
+                "testdata/test/serie2/"
+            ],
             "console": "integratedTerminal",
             "justMyCode": true
         },
         {
-            "name": "Python: Current File with params",
+            "name": "Stitch with params",
             "type": "debugpy",
             "request": "launch",
             "program": "stitch.py",
-            "args": ["testdata/test/serie1/fortand.ply", "testdata/test/serie2/"],
+            "args": [
+                "testdata/test/serie1/fortand.ply",
+                "testdata/test/serie2/"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Stitch with params and DEBUG",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "stitch.py",
+            "args": [
+                "-v",
+                "-d",
+                "testdata/test/serie1/fortand.ply",
+                "testdata/test/serie2/"
+            ],
             "console": "integratedTerminal",
             "justMyCode": true
         },

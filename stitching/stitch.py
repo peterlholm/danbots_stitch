@@ -4,7 +4,7 @@ import open3d as o3d
 from . import registration as reg
 from . import noise_removal as nr
 
-_DEBUG = False
+_DEBUG = True
 
 
 VOXEL_SIZE = 0.0005
