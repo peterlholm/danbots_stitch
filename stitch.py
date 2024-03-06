@@ -1,12 +1,14 @@
 #!/bin/python3
 "Stitch a pointcloud to pointcloud"
 import sys
+from time import perf_counter
 from pathlib import Path
 #from random import random
 import argparse
 import open3d as o3d
-#import numpy as np
+import numpy as np
 from stitching.stitch import rstitch
+from stitching.error_calc import cmp2pcl
 
 
 _DEBUG = False
@@ -47,6 +49,20 @@ def mesh_info(mesh):
     print("Oriented Bounding box",mesh.get_oriented_bounding_box())
     print("Vertices", len(mesh.vertices))
 
+def add_pcl(pcl1, pcl2):
+    "concatenate pointclouds with colors"
+    p1 = np.asarray(pcl1.points)
+    p2 = np.asarray(pcl2.points)
+    p3 = np.concatenate((p1, p2), axis=0)
+    pcl3 = o3d.geometry.PointCloud()
+    pcl3.points = o3d.utility.Vector3dVector(p3)
+    if pcl1.has_colors() and pcl2.has_colors():
+        p1_c = np.asarray(pcl1.colors)
+        p2_c = np.asarray(pcl2.colors)
+        p3_c = np.concatenate((p1_c, p2_c), axis=0)
+        pcl3.colors = o3d.utility.Vector3dVector(p3_c)
+    return pcl3
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='stitch', description='Stitch a file and a folder')
     parser.add_argument('-d', required=False, help="Turn debug on", action='store_true' )
@@ -60,8 +76,10 @@ if __name__ == "__main__":
     _VERBOSE = args.v
     _SHOW =args.s
 
+    TRANS = [[ 1, 0, 0, 0], [0, 1, 0, 0 ], [0,0,1,0],[0,0,0,1]]
+
     if _VERBOSE:
-        print(f"Stitching {str(args.org_file)} and {args.test_folder}")
+        print(f"Stitching {str(args.org_file)} and folder {args.test_folder}")
     # check files exists
     if not args.org_file.exists() or not args.test_folder.exists():
         print("input file(s) does not exist")
@@ -81,18 +99,45 @@ if __name__ == "__main__":
         #o3d.io.write_point_cloud('pcloud2.ply', in2_pcl)
     elif args.org_file.suffix=='.ply':
         in_pcl = o3d.io.read_point_cloud(str(args.org_file))
+        if not in_pcl.has_colors():
+            if _DEBUG:
+                print("putting color on ref")
+            in_pcl.paint_uniform_color((1,1,1))
     else:
         print("Input file type error")
         sys.exit(1)
-    print("ORG file:", args.org_file)
     if args.test_folder.exists():
-        for f in args.test_folder.glob("*.ply"):
+        # clean new files
+        for f in args.test_folder.glob("*new.ply"):
+            Path(f).unlink()
+        files = sorted(args.test_folder.glob("*.ply"))
+        for f in files:
+            print("-------------------------------------------")
             print("Stitching:", f)
-            print("--------------------------")
+            print("-------------------------------------------")
+            start_time = perf_counter()
             t_pcl = o3d.io.read_point_cloud(str(f))
-            transformation = rstitch(in_pcl, t_pcl)
+            transformation = rstitch(in_pcl, t_pcl, verbose=True)
+            stop_time = perf_counter()
+            print(f"Stitchingtime: {stop_time-start_time:.2f} sec" )
+            if transformation is None:
+                print(f"-------- Registration of {f} unsuccessfull ---------------")
+                continue
+            # compare with ref
+            new_pcl = t_pcl.transform(transformation)
+            rms, min, max, mean = cmp2pcl(in_pcl, new_pcl)
+            print(f"RMS error: {rms*1000:.3f} mm")
+            col_pcl = add_pcl(in_pcl, new_pcl)
+            print(f"New pointcloud with {len(col_pcl.points)} points")
+            filename = Path(f).with_suffix('.new.ply')
+            in_pcl = col_pcl
+            o3d.io.write_point_cloud(str(filename), col_pcl)
             if _DEBUG:
-                print("Transformation", transformation)
-            break
+                print("Transformation\n", transformation)
+                diff = transformation - TRANS
+                #print(diff)
+                if diff.max() > 0.005:
+                    print("Transformation Error:", diff.max())
+                    break
     else:
         print("Input folder does not exist", args.test_folder)

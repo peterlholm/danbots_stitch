@@ -4,15 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "Python Debugger: Current File with Arguments",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "args": "${command:pickArgs}"
-        },
-        {
+         {
             "name": "Python: Current File",
             "type": "debugpy",
             "request": "launch",
@@ -22,31 +14,19 @@
         },
         {
             "name": "Python: Current File DEBUG",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "program": "${file}",
             "args": [
                 "-v",
-                "-d",
                 "-s",
-                "testdata/test/serie1/fortand.ply",
-                "testdata/test/serie2/"
+                "testdata/test/serie3/ORG/file_start.ply",
+                "testdata/test/serie3/"
             ],
             "console": "integratedTerminal",
             "justMyCode": true
         },
-        {
-            "name": "Stitch with params",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "stitch.py",
-            "args": [
-                "testdata/test/serie1/fortand.ply",
-                "testdata/test/serie2/"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
+ 
         {
             "name": "Stitch with params and DEBUG",
             "type": "debugpy",

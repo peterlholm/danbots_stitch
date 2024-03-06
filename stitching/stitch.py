@@ -1,10 +1,12 @@
 "Stitch 2 point clouds"
+from time import perf_counter
 from pathlib import Path
 import open3d as o3d
 from . import registration as reg
-from . import noise_removal as nr
+import stitching.noise_removal as nr
+from stitching.error_calc import cmp2pcl
 
-_DEBUG = True
+_DEBUG = False
 
 
 VOXEL_SIZE = 0.0005
@@ -51,20 +53,20 @@ def clean_point_cloud(pcd, epsilon=0.35, minimum_points=7, required_share =0.06)
     return pcd_result
 
 
-def reg_point_clouds(ref, new):
-    "register point cloud and find tranformatin bringing new to ref"
-    #print("Computing transformations component-wise using RANSAC and ICP.")
-    test_target, transformation = reg.get_transformations(ref, new, VOXEL_SIZE)
-    return test_target, transformation
+# def reg_point_clouds(ref, new):
+#     "register point cloud and find tranformatin bringing new to ref"
+#     #print("Computing transformations component-wise using RANSAC and ICP.")
+#     test_target, transformation = reg.get_transformations(ref, new, VOXEL_SIZE)
+#     return test_target, transformation
 
-def rstitch(reference, new):
+def rstitch(reference, new, verbose=False):
     "run the stitching"
     color=True
     if _DEBUG:
         print("Input information")
         print(f"Reference: {len(reference.points):8} Points, Color: {reference.has_colors()}")
-        print(f"Test:      {len(new.points):8} Points, Color: {reference.has_colors()}")
-        color = True
+        print(f"Test:      {len(new.points):8} Points, Color: {new.has_colors()}")
+    color = not new.has_colors()
     if color:
         reference.paint_uniform_color((1,0,0))
         new.paint_uniform_color((0,1,0))
@@ -76,23 +78,30 @@ def rstitch(reference, new):
     #     objects = [c_org, c_test]
     #     show_objects(objects)
 
-    test_target, transformation = reg_point_clouds(reference, new)
-    
+    test_target, transformation = reg.get_transformations(reference, new, VOXEL_SIZE, verbose=verbose)
+
     if _DEBUG:
         print("Regisering test_target", test_target)
         print("Regisering transformation:", transformation)
-        #print("Registering information matrix", inf_matrix)
-
-    print("Transformation", transformation)
+    if test_target is None:
+        print("-------------Registration unsuccessfull----------")
     # objects = [ org, new]
     # show_objects(objects)
     return transformation
 
 
 if __name__ == "__main__":
-    ORGFILE = "testdata/test/serie3/fortand.ply"
+    #ORGFILE = "testdata/test/serie3/fortand.ply"
+    ORGFILE = "testdata/test/serie3/file2.ply"
     in_pcl = o3d.io.read_point_cloud(ORGFILE)
     TESTFILE = "testdata/test/serie3/file1.ply"
     t_pcl = o3d.io.read_point_cloud(TESTFILE)
+    start_time = perf_counter()
     mytransformation = rstitch(in_pcl, t_pcl)
-    print("Final Transformation:", mytransformation)
+    end_time = perf_counter()
+    print("Final Transformation:\n", mytransformation)
+    print("Calculation time", end_time-start_time, "sec")
+    trans = t_pcl.transform(mytransformation)
+    rms, min, max, mean = cmp2pcl(in_pcl, trans)
+    print(f"Error: Rms {rms:.6f} m  Min {min:.6f} m Max {max:.6f} m Mean {mean:.6f} m")
+    #o3d.io.write_point_cloud("trans.ply", trans )
