@@ -4,7 +4,7 @@ import copy
 import open3d as o3d
 import numpy as np
 
-_DEBUG = False
+_DEBUG = True
 _SHOW = True
 _TIMING = False
 _TMPFILE = True
@@ -12,8 +12,8 @@ _TMPFILE = True
 # original
 GLOBAL_FITNESS = 0.5    # percent to overlap
 GLOBAL_RMSE = 0.001
-#GLOBAL_FITNESS = 0.2    # percent to overlap
-#GLOBAL_RMSE = 0.002
+GLOBAL_FITNESS = 0.3   # percent to overlap
+GLOBAL_RMSE = 0.0005
 
 #original
 LOCAL_FITNESS = 0.5
@@ -59,7 +59,7 @@ def preprocess_point_cloud(pcd, voxel_size):
         pcd_down,
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
     if _DEBUG:
-        print(f"pcd_fpfh features dimension: {pcd_fpfh.dimension()} number features: {pcd_fpfh.num()}")
+        print(f"Number features: {pcd_fpfh.num()}")
     return pcd_down, pcd_fpfh
 
 def execute_global_registration(reference_down, target_down,        # pylint: disable=too-many-arguments
@@ -98,11 +98,11 @@ def execute_local_registration(source_down, reference_down, voxel_size,
 
 def prepare_dataset(ref, test_target, voxel_size):
     "prepare data set "
-    if _DEBUG:
-        print("Preprocessing reference")
+    # if _DEBUG:
+    #     print("Preprocessing reference")
     ref_down, ref_fpfh = preprocess_point_cloud(ref, voxel_size)
-    if _DEBUG:
-        print("Preprocession test target")
+    # if _DEBUG:
+    #     print("Preprocession test target")
     test_target_down, test_target_fpfh = preprocess_point_cloud(test_target, voxel_size)
     return ref_down, test_target_down, ref_fpfh, test_target_fpfh
 
@@ -121,6 +121,8 @@ def get_transformations(ref, test_target, voxel_size=0.0005, verbose=False):
     global_time = perf_counter()
     if _DEBUG:
         print(f"Global Registration result: Fittnes {result_ransac.fitness} Rms {result_ransac.inlier_rmse}")
+        #draw_registration_result(ref_down, test_down, result_ransac.transformation, window_name="Global registration")
+        
     if result_ransac.fitness < GLOBAL_FITNESS or result_ransac.inlier_rmse > GLOBAL_RMSE:
         print("BAD GLOBAL REGISTRATION", result_ransac)
         print(result_ransac.transformation)

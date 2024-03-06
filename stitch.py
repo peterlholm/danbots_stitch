@@ -120,6 +120,8 @@ if __name__ == "__main__":
             transformation = rstitch(in_pcl, t_pcl, verbose=True)
             stop_time = perf_counter()
             print(f"Stitchingtime: {stop_time-start_time:.2f} sec" )
+
+            tt=rstitch(t_pcl, in_pcl, verbose=True)
             if transformation is None:
                 print(f"-------- Registration of {f} unsuccessfull ---------------")
                 continue
