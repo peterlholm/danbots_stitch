@@ -25,7 +25,7 @@ def draw_registration_result(reference, test_source, transformation, axis=False,
     if axis:
         axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.01, origin=[0, 0, 0])
         pointclouds.append(axis_pcd)
-    o3d.visualization.draw_geometries(pointclouds, window_name=window_name)
+    o3d.visualization.draw_geometries(pointclouds, window_name=window_name, width=500, height=500)
 
 def compute_normal(pcd):
     "creates normalts that all point in same (wrong) direction (due to low radius)"
@@ -41,6 +41,7 @@ def preprocess_point_cloud(pcd, voxel_size):
     "prepare point cloud by down sample and compute features"
     pcd_down = pcd.voxel_down_sample(voxel_size)
     if _DEBUG:
+        print("Preprocession and finding features")
         print(f"Downsample voxel({voxel_size }) to {len(pcd_down.points)} points")
     compute_normal(pcd_down)
     if _TMPFILE:
@@ -50,7 +51,8 @@ def preprocess_point_cloud(pcd, voxel_size):
     pcd_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
         pcd_down,
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
-    print(f"pcd_fpfh features dimension: {pcd_fpfh.dimension()} numbers: {pcd_fpfh.num()}")
+    if _DEBUG:
+        print(f"pcd_fpfh features dimension: {pcd_fpfh.dimension()} number features: {pcd_fpfh.num()}")
     return pcd_down, pcd_fpfh
 
 def execute_global_registration(reference_down, target_down,        # pylint: disable=too-many-arguments
@@ -60,7 +62,8 @@ def execute_global_registration(reference_down, target_down,        # pylint: di
                                 converge_itr=(10**8),
                                 converge_certainty=0.9999):
     "find global registation"
-
+    if _DEBUG:
+        print("Global registration")
     distance_threshold = voxel_size * dist_thres_scalar
     result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
         target_down, reference_down,  target_fpfh, reference_fpfh, True,
@@ -86,21 +89,23 @@ def execute_local_registration(source_down, reference_down, voxel_size,
                     criteria=conver_crit)
     return result_icp
 
-
 def prepare_dataset(ref, test_target, voxel_size):
     "prepare data set "
+    if _DEBUG:
+        print("Preprocessing reference")
     ref_down, ref_fpfh = preprocess_point_cloud(ref, voxel_size)
+    if _DEBUG:
+        print("Preprocession test target")
     test_target_down, test_target_fpfh = preprocess_point_cloud(test_target, voxel_size)
     return ref_down, test_target_down, ref_fpfh, test_target_fpfh
 
 def get_transformations(ref, test_target, voxel_size=0.0005):
     "get transformations from pointclouds"
-    print("Get transformations, voxel size", voxel_size)
-    #voxel_size = 0.0005
+    if _DEBUG:
+        print("Get transformations, voxel size", voxel_size)
     ref_down, test_down, ref_fpfh, test_fpfh = prepare_dataset(ref, test_target, voxel_size)
-    if _SHOW:
-        print("try show")
-        o3d.visualization.draw_geometries([ref_down, test_down], window_name="downsample")
+    # if _SHOW:
+    #     o3d.visualization.draw_geometries([ref_down, test_down], window_name="downsample", height=500, width=500)
     result_ransac = execute_global_registration(
             ref_down, test_down, ref_fpfh, test_fpfh,
             voxel_size)

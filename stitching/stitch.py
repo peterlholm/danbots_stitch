@@ -16,7 +16,7 @@ def color_obj(obj, color=(0,0,0)):
 
 def show_objects(obj, name=""):
     "Show the object list"
-    o3d.visualization.draw_geometries(obj, window_name=name, width=1000, height=1000)
+    o3d.visualization.draw_geometries(obj, window_name=name, width=500, height=500)
                                   #zoom=0.3412,
                                   #zoom=0.63,
                                   #front=[0.4257, -0.2125, -0.8795],
@@ -61,21 +61,23 @@ def rstitch(reference, new):
     "run the stitching"
     color=True
     if _DEBUG:
+        print("Input information")
         print(f"Reference: {len(reference.points):8} Points, Color: {reference.has_colors()}")
         print(f"Test:      {len(new.points):8} Points, Color: {reference.has_colors()}")
         color = True
     if color:
         reference.paint_uniform_color((1,0,0))
         new.paint_uniform_color((0,1,0))
-    if False:   # cleaning
-        print("start cleaning")
-        c_org = clean_point_cloud(reference)
-        c_test = clean_point_cloud(new, epsilon=1)
-        color_obj(c_test)
-        objects = [c_org, c_test]
-        show_objects(objects)
+    # if False:   # cleaning
+    #     print("start cleaning")
+    #     c_org = clean_point_cloud(reference)
+    #     c_test = clean_point_cloud(new, epsilon=1)
+    #     color_obj(c_test)
+    #     objects = [c_org, c_test]
+    #     show_objects(objects)
 
     test_target, transformation = reg_point_clouds(reference, new)
+    
     if _DEBUG:
         print("Regisering test_target", test_target)
         print("Regisering transformation:", transformation)
@@ -85,3 +87,12 @@ def rstitch(reference, new):
     # objects = [ org, new]
     # show_objects(objects)
     return transformation
+
+
+if __name__ == "__main__":
+    ORGFILE = "testdata/test/serie3/fortand.ply"
+    in_pcl = o3d.io.read_point_cloud(ORGFILE)
+    TESTFILE = "testdata/test/serie3/file1.ply"
+    t_pcl = o3d.io.read_point_cloud(TESTFILE)
+    mytransformation = rstitch(in_pcl, t_pcl)
+    print("Final Transformation:", mytransformation)
