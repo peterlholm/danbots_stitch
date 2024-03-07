@@ -7,12 +7,12 @@ _DEBUG = True
 # Limit is ratio of total points in a cluster required to keep it.
 def keep_significant_clusters(pcd, limit=0.06, eps=0.35, min_points=7):
     "reduse pointcloud to significant clusters"
-    if _DEBUG:
-        print(f"keeep significant cluster DBSCAN limit {limit} eps {eps} min_points {min_points}")
+    # if _DEBUG:
+    #     print(f"keeep significant cluster DBSCAN limit {limit} eps {eps} min_points {min_points}")
     pcd_result = o3d.geometry.PointCloud()
     clusters = pcd.cluster_dbscan(eps, min_points)
-    if _DEBUG:
-        print("DBSCAN result cluster[0]", clusters[0])
+    # if _DEBUG:
+    #     print("DBSCAN result cluster[0]", clusters[0])
     # Messy way to count how many points are in each cluster.
     cluster_indicies = np.array(clusters) + 1
     # Bincount only counts non-negative.
@@ -25,8 +25,8 @@ def keep_significant_clusters(pcd, limit=0.06, eps=0.35, min_points=7):
     kept_indicies = []
     for (cluster, count) in counts:
         if cluster == -1:  # Skip the noise.
-            if _DEBUG:
-                print("skip", count)
+            # if _DEBUG:
+            #     print("skip", count)
             continue
         # if _DEBUG:
         #     print(count)
@@ -46,7 +46,7 @@ def keep_significant_clusters(pcd, limit=0.06, eps=0.35, min_points=7):
         else:
             pass
     if _DEBUG:
-        print(f"no points {len(pcd.points)} kept indicies  {len(kept_indicies)}")
+        print(f"keep_significant_clusters: no points: {len(pcd.points)} kept indicies: {len(kept_indicies)}")
     return (pcd_result, kept_indicies)
 
 
@@ -54,3 +54,15 @@ def get_cluster_indicies(clusters, cluster):
     "get cluster image"
     #print("get_cluster_indices")
     return [i for i, x in enumerate(clusters) if x == cluster]
+
+
+def clean_point_cloud(pcd, epsilon=0.35, minimum_points=7, required_share =0.06):
+    "clean pointcloud with Pre-stitching cleaning parameters"
+    epsilon = 0.35
+    minimum_points = 7
+    required_share = 0.06
+    #print("input points", len(pcd.points) )
+    pcd_result, kept_indicies = nr.keep_significant_clusters(pcd, required_share, epsilon, minimum_points)
+    if _DEBUG:
+        print("Removing ", len(pcd.points) - len(kept_indicies), "points of " + str(len(pcd.points)))
+    return pcd_result

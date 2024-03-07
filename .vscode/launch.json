@@ -28,10 +28,10 @@
         },
  
         {
-            "name": "Stitch with params and DEBUG",
+            "name": "Stitch singlefile",
             "type": "debugpy",
             "request": "launch",
-            "program": "stitch.py",
+            "program": "stitching/stitch.py",
             "args": [
                 "-v",
                 "-d",

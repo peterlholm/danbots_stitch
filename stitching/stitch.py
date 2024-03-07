@@ -59,8 +59,8 @@ def clean_point_cloud(pcd, epsilon=0.35, minimum_points=7, required_share =0.06)
 #     test_target, transformation = reg.get_transformations(ref, new, VOXEL_SIZE)
 #     return test_target, transformation
 
-def rstitch(reference, new, verbose=False):
-    "run the stitching"
+def r_registration(reference, new, verbose=False):
+    "run the registation and get transformation matrix"
     color=True
     if _DEBUG:
         print("Input information")
@@ -70,15 +70,19 @@ def rstitch(reference, new, verbose=False):
     if color:
         reference.paint_uniform_color((1,0,0))
         new.paint_uniform_color((0,1,0))
-    # if False:   # cleaning
-    #     print("start cleaning")
-    #     c_org = clean_point_cloud(reference)
-    #     c_test = clean_point_cloud(new, epsilon=1)
-    #     color_obj(c_test)
-    #     objects = [c_org, c_test]
-    #     show_objects(objects)
+    # cleaning
+    #print("start cleaning")
+    c_org = clean_point_cloud(reference)
+    o3d.io.write_point_cloud("/tmp/clean_org.ply", c_org )
+    c_test = clean_point_cloud(new, epsilon=1)
+    o3d.io.write_point_cloud("/tmp/clean_test.ply", c_test )
+   
+    #c_org.paint_uniform_color((1,0,0))
+    #show_objects([reference, c_org], name="cleaning")
 
-    test_target, transformation = reg.get_transformations(reference, new, VOXEL_SIZE, verbose=verbose)
+
+    #test_target, transformation = reg.get_transformations(reference, new, VOXEL_SIZE, verbose=verbose)
+    test_target, transformation = reg.get_transformations(c_org, c_test, VOXEL_SIZE, verbose=verbose)
 
     if _DEBUG:
         print("Regisering test_target", test_target)
@@ -92,7 +96,7 @@ def rstitch(reference, new, verbose=False):
 
 if __name__ == "__main__":
     #ORGFILE = "testdata/test/serie3/fortand.ply"
-    ORGFILE = "testdata/test/serie3/file2.ply"
+    ORGFILE = "testdata/test/serie3/ORG/file_start.ply"
     in_pcl = o3d.io.read_point_cloud(ORGFILE)
     TESTFILE = "testdata/test/serie3/file1.ply"
     t_pcl = o3d.io.read_point_cloud(TESTFILE)
@@ -102,6 +106,6 @@ if __name__ == "__main__":
     print("Final Transformation:\n", mytransformation)
     print("Calculation time", end_time-start_time, "sec")
     trans = t_pcl.transform(mytransformation)
-    rms, min, max, mean = cmp2pcl(in_pcl, trans)
-    print(f"Error: Rms {rms:.6f} m  Min {min:.6f} m Max {max:.6f} m Mean {mean:.6f} m")
+    rms, mmin, mmax, mean = cmp2pcl(in_pcl, trans)
+    print(f"Error: Rms {rms:.6f} m  Min {mmin:.6f} m Max {mmax:.6f} m Mean {mean:.6f} m")
     #o3d.io.write_point_cloud("trans.ply", trans )

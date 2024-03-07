@@ -7,7 +7,7 @@ from pathlib import Path
 import argparse
 import open3d as o3d
 import numpy as np
-from stitching.stitch import rstitch
+from stitching.stitch import r_registration
 from stitching.error_calc import cmp2pcl
 
 
@@ -117,17 +117,17 @@ if __name__ == "__main__":
             print("-------------------------------------------")
             start_time = perf_counter()
             t_pcl = o3d.io.read_point_cloud(str(f))
-            transformation = rstitch(in_pcl, t_pcl, verbose=True)
+            transformation = r_registration(in_pcl, t_pcl, verbose=True)
             stop_time = perf_counter()
             print(f"Stitchingtime: {stop_time-start_time:.2f} sec" )
 
-            tt=rstitch(t_pcl, in_pcl, verbose=True)
+            tt=r_registration(t_pcl, in_pcl, verbose=True)
             if transformation is None:
                 print(f"-------- Registration of {f} unsuccessfull ---------------")
                 continue
             # compare with ref
             new_pcl = t_pcl.transform(transformation)
-            rms, min, max, mean = cmp2pcl(in_pcl, new_pcl)
+            rms, mmin, mmax, mean = cmp2pcl(in_pcl, new_pcl)
             print(f"RMS error: {rms*1000:.3f} mm")
             col_pcl = add_pcl(in_pcl, new_pcl)
             print(f"New pointcloud with {len(col_pcl.points)} points")
