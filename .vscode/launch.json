@@ -13,12 +13,69 @@
             "justMyCode": true
         },
         {
-            "name": "Python: Current File DEBUG",
+            "name": "Python: Stitch Single file",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "args": [
+                "-v",
+                "--output", "tmp/tt.ply",
+                "testdata/test/serie5/file01.ply",
+                "testdata/test/serie5/file02.ply",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
+            "name": "Python: Stitch Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "args": [
+                "-d",
+                "testdata/test/serie4/ORG/file_start.ply",
+                "testdata/test/serie4/"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Stitch Test Verbose Show",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "args": [
                 "-v",
+                "-s",
+                "testdata/test/serie4/ORG/file_start.ply",
+                "testdata/test/serie4/"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
+            "name": "Python: Stitch Test noise removal",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "args": [
+                "-n",
+                "testdata/test/serie3/ORG/file_start.ply",
+                "testdata/test/serie3/"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+         {
+            "name": "Python: Stitch Test DEBUG",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "args": [
+                "-v", "-d",
                 "-s",
                 "testdata/test/serie3/ORG/file_start.ply",
                 "testdata/test/serie3/"

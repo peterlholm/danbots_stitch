@@ -2,7 +2,7 @@
 import numpy as np
 import open3d as o3d
 
-_DEBUG = True
+_DEBUG = False
 
 # Limit is ratio of total points in a cluster required to keep it.
 def keep_significant_clusters(pcd, limit=0.06, eps=0.35, min_points=7):

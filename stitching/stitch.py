@@ -59,7 +59,7 @@ def clean_point_cloud(pcd, epsilon=0.35, minimum_points=7, required_share =0.06)
 #     test_target, transformation = reg.get_transformations(ref, new, VOXEL_SIZE)
 #     return test_target, transformation
 
-def r_registration(reference, new, verbose=False):
+def r_registration(reference, new, verbose=False, noise_removal=False):
     "run the registation and get transformation matrix"
     color=True
     if _DEBUG:
@@ -71,24 +71,22 @@ def r_registration(reference, new, verbose=False):
         reference.paint_uniform_color((1,0,0))
         new.paint_uniform_color((0,1,0))
     # cleaning
-    #print("start cleaning")
-    c_org = clean_point_cloud(reference)
-    o3d.io.write_point_cloud("/tmp/clean_org.ply", c_org )
-    c_test = clean_point_cloud(new, epsilon=1)
-    o3d.io.write_point_cloud("/tmp/clean_test.ply", c_test )
-   
+    if noise_removal:
+        #print("start cleaning")
+        c_org = clean_point_cloud(reference)
+        o3d.io.write_point_cloud("/tmp/clean_org.ply", c_org )
+        c_test = clean_point_cloud(new, epsilon=1)
+        o3d.io.write_point_cloud("/tmp/clean_test.ply", c_test )
+        test_target, transformation = reg.get_transformations(c_org, c_test, VOXEL_SIZE, verbose=verbose)
+    else:
+        test_target, transformation = reg.get_transformations(reference, new, VOXEL_SIZE, verbose=verbose)
+
     #c_org.paint_uniform_color((1,0,0))
     #show_objects([reference, c_org], name="cleaning")
-
-
-    #test_target, transformation = reg.get_transformations(reference, new, VOXEL_SIZE, verbose=verbose)
-    test_target, transformation = reg.get_transformations(c_org, c_test, VOXEL_SIZE, verbose=verbose)
 
     if _DEBUG:
         print("Regisering test_target", test_target)
         print("Regisering transformation:", transformation)
-    if test_target is None:
-        print("-------------Registration unsuccessfull----------")
     # objects = [ org, new]
     # show_objects(objects)
     return transformation

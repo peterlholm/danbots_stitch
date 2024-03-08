@@ -4,15 +4,15 @@ import copy
 import open3d as o3d
 import numpy as np
 
-_DEBUG = True
-_SHOW = True
+_DEBUG = False
+_SHOW = False
 _TIMING = False
 _TMPFILE = True
 
 # original
 GLOBAL_FITNESS = 0.5    # percent to overlap
 GLOBAL_RMSE = 0.001
-GLOBAL_FITNESS = 0.3   # percent to overlap
+GLOBAL_FITNESS = 0.2   # percent to overlap
 GLOBAL_RMSE = 0.0005
 
 #original
@@ -122,16 +122,15 @@ def get_transformations(ref, test_target, voxel_size=0.0005, verbose=False):
     if _DEBUG:
         print(f"Global Registration result: Fittnes {result_ransac.fitness} Rms {result_ransac.inlier_rmse}")
         #draw_registration_result(ref_down, test_down, result_ransac.transformation, window_name="Global registration")
-        
+
     if result_ransac.fitness < GLOBAL_FITNESS or result_ransac.inlier_rmse > GLOBAL_RMSE:
         print("BAD GLOBAL REGISTRATION", result_ransac)
-        print(result_ransac.transformation)
+        #print(result_ransac.transformation)
         if _SHOW:
             print("global transformation matrix", result_ransac, np.around(result_ransac.transformation,3))
             draw_registration_result(ref_down, test_down, result_ransac.transformation, window_name="Global registration")
-
         return None, None
-    
+
     local_start = perf_counter()
     result_icp = execute_local_registration(
             test_down, ref_down,
@@ -147,7 +146,7 @@ def get_transformations(ref, test_target, voxel_size=0.0005, verbose=False):
             draw_registration_result(ref_down, test_down, result_icp.transformation, window_name="Local registration")
             print("global transformation matrix", result_ransac, np.around(result_ransac.transformation,3))
             draw_registration_result(ref_down, test_down, result_ransac.transformation, window_name="Global registration")
-
+        return None, None
 
     transformation = result_icp.transformation
 
