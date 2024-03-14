@@ -92,8 +92,8 @@
             "args": [
                 "-v",
                 "-d",
-                "testdata/test/serie1/fortand.ply",
-                "testdata/test/serie2/"
+                "testdata/test/arti/ORG/center.ply",
+                "testdata/test/arti/file1.ply"
             ],
             "console": "integratedTerminal",
             "justMyCode": true
