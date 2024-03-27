@@ -3,7 +3,7 @@ from time import perf_counter
 from pathlib import Path
 import open3d as o3d
 import registration as reg
-import noise_removal as nr
+#import noise_removal as nr
 from stitching.error_calc import cmp2pcl
 
 _DEBUG = False

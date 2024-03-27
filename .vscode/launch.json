@@ -13,6 +13,21 @@
             "justMyCode": true
         },
         {
+            "name": "Python: Stitch Test arti2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "stitch3d.py",
+            "args": [
+                "-v", "-d",
+                "-s",
+                "testdata/test/arti2/ORG/start.ply",
+                "testdata/test/arti/"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
             "name": "Python: Stitch Single file",
             "type": "debugpy",
             "request": "launch",
@@ -71,14 +86,14 @@
 
          {
             "name": "Python: Stitch Test DEBUG",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "args": [
                 "-v", "-d",
                 "-s",
-                "testdata/test/serie3/ORG/file_start.ply",
-                "testdata/test/serie3/"
+                "testdata/test/arti/ORG/file01.ply",
+                "testdata/test/arti/"
             ],
             "console": "integratedTerminal",
             "justMyCode": true

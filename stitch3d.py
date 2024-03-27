@@ -6,13 +6,13 @@ from pathlib import Path
 import argparse
 import open3d as o3d
 import numpy as np
-from stitching.stitch import r_registration
-from stitching.error_calc import cmp2pcl
-from stitching.pcl_utils import concatenate_pcl
+# from stitching.stitch import r_registration
+# from stitching.error_calc import cmp2pcl
+# from stitching.pcl_utils import concatenate_pcl
 
 
 sys.path.append("/usr/local/lib")
-from lib3d import get_transformation
+from lib3d import get_transformations
 #from lib3d.registration import get_transformations, draw_registration_result  # pylint: disable=import-error
 
 
@@ -127,7 +127,8 @@ if __name__ == "__main__":
             print("-------------------------------------------")
             start_time = perf_counter()
             t_pcl = o3d.io.read_point_cloud(str(f))
-            transformation = r_registration(in_pcl, t_pcl, verbose=True, noise_removal=args.n)
+            #transformation = r_registration(in_pcl, t_pcl, verbose=True, noise_removal=args.n)
+            test_pcl, transformation = get_transformations(in_pcl, t_pcl, verbose=True)
             stop_time = perf_counter()
             print(f"Stitchingtime: {stop_time-start_time:.2f} sec" )
 
