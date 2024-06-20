@@ -13,6 +13,36 @@
             "justMyCode": true
         },
         {
+            "name": "Python: Stitch Single Fortand",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "stitch3d.py",
+            "args": [
+                "-v", "-d",
+                "-s", "-o", "output.ply",
+                "testdata/fortand/ORG/start.ply",
+                "testdata/fortand/cut/file04.ply"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
+            "name": "Python: Stitch Fortand",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "stitch3d.py",
+            "args": [
+                "-v", "-d",
+                "-s",
+                "testdata/fortand/ORG/start.ply",
+                "testdata/fortand/trans/"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
             "name": "Python: Stitch Test arti2",
             "type": "debugpy",
             "request": "launch",
@@ -44,7 +74,7 @@
 
         {
             "name": "Python: Stitch Test",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "args": [
@@ -57,7 +87,7 @@
         },
         {
             "name": "Python: Stitch Test Verbose Show",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "args": [
@@ -72,7 +102,7 @@
 
         {
             "name": "Python: Stitch Test noise removal",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "args": [

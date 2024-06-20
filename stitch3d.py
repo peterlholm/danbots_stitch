@@ -7,16 +7,16 @@ import argparse
 import open3d as o3d
 import numpy as np
 # from stitching.stitch import r_registration
-# from stitching.error_calc import cmp2pcl
-# from stitching.pcl_utils import concatenate_pcl
-
+from stitching.error_calc import cmp2pcl
+from stitching.pcl_utils import concatenate_pcl
 
 sys.path.append("/usr/local/lib")
-from lib3d import get_transformations
+from lib3d import get_transformations   # pylint: disable=import-error
+
 #from lib3d.registration import get_transformations, draw_registration_result  # pylint: disable=import-error
 
 
-_DEBUG = False
+_DEBUG = True
 _SHOW = True
 _VERBOSE = False
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
         # stitch input in_pcl
         start_time = perf_counter()
         t_pcl = o3d.io.read_point_cloud(str(args.test_file_folder))
-        transformation = get_transformation(in_pcl, t_pcl, verbose=True)
+        target, transformation = get_transformations(in_pcl, t_pcl, verbose=True)
         #transformation = r_registration(in_pcl, t_pcl, verbose=True, noise_removal=args.n)
         stop_time = perf_counter()
         if _VERBOSE:
@@ -166,7 +166,7 @@ if __name__ == "__main__":
             print(f"-------- Registration of {str(args.test_file_folder)} unsuccessfull ---------------")
             sys.exit(2)
         else:
-            print(transformation)
+            print("Transformation\n", transformation)
         if args.output:
             print(args.output.parent.absolute())
             if not args.output.parent.exists():
@@ -177,6 +177,6 @@ if __name__ == "__main__":
             print(f"RMS error: {rms*1000:.3f} mm")
             col_pcl = concatenate_pcl(in_pcl, new_pcl)
             print(f"New pointcloud with {len(col_pcl.points)} points")
-            filename = Path(f).with_suffix('.new.ply')
+            filename = Path(args.test_file_folder).with_suffix('.new.ply')
             in_pcl = col_pcl
             o3d.io.write_point_cloud(str(filename), col_pcl)
