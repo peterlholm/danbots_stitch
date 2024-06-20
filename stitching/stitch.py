@@ -99,7 +99,7 @@ if __name__ == "__main__":
     TESTFILE = "testdata/test/serie3/file1.ply"
     t_pcl = o3d.io.read_point_cloud(TESTFILE)
     start_time = perf_counter()
-    mytransformation = rstitch(in_pcl, t_pcl)
+    mytransformation = r_registration(in_pcl, t_pcl)
     end_time = perf_counter()
     print("Final Transformation:\n", mytransformation)
     print("Calculation time", end_time-start_time, "sec")
