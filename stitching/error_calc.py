@@ -4,7 +4,7 @@ import numpy as np
 import open3d as o3d
 
 
-_DEBUG = False
+_DEBUG = True
 
 def surface_to_pcl(mesh, alg="poisson", number_of_points=100000, init_factor=10):
     "convert mesh surfaces to pointcloud, point_factor vertices/points"
@@ -26,7 +26,7 @@ def cmp2pcl(org_pcl, test_pcl):
     if _DEBUG:
         print("No Points in reference", len(org_pcl.points))
         print("No Points in testfile", len(test_pcl.points))
-    dist = test_pcl.compute_point_cloud_distance(org_pcl)
+    dist = org_pcl.compute_point_cloud_distance(test_pcl)
     #print(dist)
     distance = np.asarray(dist)
     if _DEBUG:
