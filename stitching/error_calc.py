@@ -19,7 +19,10 @@ def surface_to_pcl(mesh, alg="poisson", number_of_points=100000, init_factor=10)
 
 
 def cmp2pcl(org_pcl, test_pcl):
-    "compare 2 pcl a pointcloud and return a value for the error"
+    """
+    compare 2 pcl a pointcloud and return a value for the error
+    the test point cloud must be smaler than the org to return a valid result
+    """
     if _DEBUG:
         print("No Points in reference", len(org_pcl.points))
         print("No Points in testfile", len(test_pcl.points))
@@ -30,11 +33,16 @@ def cmp2pcl(org_pcl, test_pcl):
         print(distance)
     pclerror = np.sqrt(np.mean(distance ** 2))
     if _DEBUG:
-        print(f"Min error:  {np.min(distance):.6f} m")
-        print(f"Max error:  {np.max(distance):.6f} m")
-        print(f"Mean error: {np.mean(distance):.6f} m")
+        print(f"Min error:  {np.min(distance):.6f}")
+        print(f"Max error:  {np.max(distance):.6f}")
+        print(f"Mean error: {np.mean(distance):.6f}")
         print(f"RMS:        {pclerror:.6f} m")
     return pclerror, np.min(distance), np.max(distance), np.mean(distance)
+
+def stitch_error_result(in_pcl, t_pcl, transformation=None):
+    "return error from a stitch"
+    evalu = o3d.evaluate_registration(in_pcl, t_pcl, transformation)
+    print(f"Evaluation of registration: Fitness: {evalu.fitness*100}% RMSE: {evalu.inlier_rmse} CorrespondancesSet: {len(evalu.correspondence_set)}")
 
 if __name__ == "__main__":
     ORGFILE = "testdata/test/serie3/fortand.ply"

@@ -8,7 +8,7 @@ import open3d as o3d
 import numpy as np
 # from stitching.stitch import r_registration
 from stitching.error_calc import cmp2pcl
-from stitching.pcl_utils import concatenate_pcl
+from stitching.pcl_utils import concatenate_pcl, evaluate_registration
 
 sys.path.append("/usr/local/lib")
 from lib3d import get_transformations   # pylint: disable=import-error
@@ -17,7 +17,6 @@ from lib3d import get_transformations   # pylint: disable=import-error
 
 
 _DEBUG = True
-_SHOW = True
 _VERBOSE = False
 
 
@@ -109,13 +108,17 @@ if __name__ == "__main__":
         print("Input file type error")
         sys.exit(1)
 
+    if _DEBUG:
+        print(f"Refencefile {len(in_pcl.points)} point")
     # check 2. file or folder
 
     if not args.test_file_folder.exists():
         print("input file/folder does not exist")
         sys.exit(1)
     # check file types
+
     if args.test_file_folder.is_dir():
+
         # stitch folder
         # clean new files
         for f in args.test_file_folder.glob("*new.ply"):
@@ -157,24 +160,41 @@ if __name__ == "__main__":
         # stitch input in_pcl
         start_time = perf_counter()
         t_pcl = o3d.io.read_point_cloud(str(args.test_file_folder))
+        if _DEBUG:
+            print(f"Testfile {len(t_pcl.points)} points")
+
         target, transformation = get_transformations(in_pcl, t_pcl, verbose=True)
-        #transformation = r_registration(in_pcl, t_pcl, verbose=True, noise_removal=args.n)
-        stop_time = perf_counter()
         if _VERBOSE:
-            print(f"Stitchingtime: {stop_time-start_time:.2f} sec" )
+            print(f"Stitchingtime: {perf_counter()-start_time:.2f} sec" )
         if transformation is None:
             print(f"-------- Registration of {str(args.test_file_folder)} unsuccessfull ---------------")
             sys.exit(2)
         else:
             print("Transformation\n", transformation)
+
+        if _SHOW:
+            #reference_temp = copy.deepcopy(reference)
+            #test_temp = copy.deepcopy(test_source)
+            in_pcl.paint_uniform_color([0, 0.7, 0.1])   # green
+            t_pcl.paint_uniform_color([1, 0.0, 0.1])        # red
+            t_pcl.transform(transformation)
+            pointclouds =[in_pcl, t_pcl]
+            if True:
+                axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=10.0, origin=[0, 0, 0])
+                pointclouds.append(axis_pcd)
+            o3d.visualization.draw_geometries(pointclouds, window_name="Stitched result", width=500, height=500)
+
+        evalu = evaluate_registration(in_pcl, t_pcl, transformation)
+        print(f"Evaluation of registration: Fitness: {evalu.fitness*100:.1f}% RMSE: {evalu.inlier_rmse:.3} CorrespondancesSet: {len(evalu.correspondence_set)}")
+
         if args.output:
             print(args.output.parent.absolute())
             if not args.output.parent.exists():
                 print("Outputfolder does not exist")
                 sys.exit(2)
             new_pcl = t_pcl.transform(transformation)
-            rms, mmin, mmax, mean = cmp2pcl(in_pcl, new_pcl)
-            print(f"RMS error: {rms*1000:.3f} mm")
+            #rms, mmin, mmax, mean = cmp2pcl(in_pcl, new_pcl)
+            #print(f"RMS error: {rms:.3f} Min error: {mmin:.3f} Max error: {mmax:.3f} Mean error: {mean:.3f}")
             col_pcl = concatenate_pcl(in_pcl, new_pcl)
             print(f"New pointcloud with {len(col_pcl.points)} points")
             filename = Path(args.test_file_folder).with_suffix('.new.ply')
