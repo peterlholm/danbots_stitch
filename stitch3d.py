@@ -139,10 +139,13 @@ if __name__ == "__main__":
             # compare with ref
             new_pcl = t_pcl.transform(transformation)
             rms, mmin, mmax, mean = cmp2pcl(in_pcl, new_pcl)
-            print(f"RMS error: {rms*1000:.3f} mm")
+            print(f"RMS error: {rms:.3f} ")
             col_pcl = concatenate_pcl(in_pcl, new_pcl)
             print(f"New pointcloud with {len(col_pcl.points)} points")
-            filename = Path(f).with_suffix('.new.ply')
+            if args.o:
+                filename = args.o
+            else:
+                filename = Path(f).with_suffix('.new.ply')
             in_pcl = col_pcl
             o3d.io.write_point_cloud(str(filename), col_pcl)
             if _DEBUG:
@@ -166,17 +169,21 @@ if __name__ == "__main__":
             print(f"-------- Registration of {str(args.test_file_folder)} unsuccessfull ---------------")
             sys.exit(2)
         else:
-            print("Transformation\n", transformation)
+            print("Transformation\n", transformation, transformation.transformation)
+            print("corespondances", transformation.correspondence_set)
         if args.output:
             print(args.output.parent.absolute())
             if not args.output.parent.exists():
                 print("Outputfolder does not exist")
                 sys.exit(2)
-            new_pcl = t_pcl.transform(transformation)
+            new_pcl = t_pcl.transform(transformation.transformation)
             rms, mmin, mmax, mean = cmp2pcl(in_pcl, new_pcl)
-            print(f"RMS error: {rms*1000:.3f} mm")
+            print(f"RMS error: {rms:.3f} ")
             col_pcl = concatenate_pcl(in_pcl, new_pcl)
             print(f"New pointcloud with {len(col_pcl.points)} points")
-            filename = Path(args.test_file_folder).with_suffix('.new.ply')
+            # if args.o:
+            filename = args.output
+            # else:
+            #filename = Path(args.test_file_folder).with_suffix('.new.ply')
             in_pcl = col_pcl
             o3d.io.write_point_cloud(str(filename), col_pcl)
